@@ -1,30 +1,60 @@
 /* eslint-disable */
 
 import React, { PureComponent } from 'react';
-import ReactCanvas, { Gradient, Group, Image, ListView, Surface, Text } from 'react-canvas';
+import TransitionGroup from 'react-transition-group/TransitionGroup';
+import Transition from 'react-transition-group/Transition';
 
-class MyListView extends ListView {
-  doScroll(e) {
-    if (this.scroller) {
-      this.scroller.scrollBy(0, e.deltaY, true);
-      this.scroller.doTouchMove([e], e.timeStamp);
-    }
-  };
+const colors = [
+  '#ff00ff',
+  '#00ffff',
+  '#ffff00',
+  '#ff0000',
+  '#00ff00',
+  '#0000ff',
+];
+
+const duration = 300;
+
+const defaultStyle = {
+  transition: `all ${duration}ms ease-in-out`,
+  opacity: 0,
 }
+
+const transitionStyles = {
+  entering: { opacity: 0, height: 0, transform: 'scaleY(0)' },
+  entered:  { opacity: 1, height: 200, transform: 'scaleY(1)' },
+};
+
+const Fade = ({ children, ...props }) => (
+  <Transition {...props} timeout={duration} appear={true} enter={true} exit={true}>
+    {(state) => (
+      <div style={{
+        ...defaultStyle,
+        ...transitionStyles[state]
+      }}>
+        {children}
+      </div>
+    )}
+  </Transition>
+);
 
 class Start extends PureComponent {
 
-  getNumberOfItems() {
-    return 10;
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      items: [1],
+    };
   }
 
   getItemHeight() {
     const surfaceHeight = window.innerHeight;
 
-    return surfaceHeight / 2;
+    return surfaceHeight / 5;
   }
 
-  renderItem = (index) => {
+  renderItem = (value, index) => {
 
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
@@ -32,9 +62,11 @@ class Start extends PureComponent {
     const height = this.getItemHeight();
     const width = surfaceWidth;
 
-    const groupStyle = { top: 0, left: 0, width, height };
+    const groupStyle = { position: 'relative', width, height };
 
     const snapshotStyles = {
+      position: 'absolute',
+      backgroundColor: colors[value % colors.length],
       height: height/2,
       width: height/2,
       top: 0,
@@ -42,6 +74,8 @@ class Start extends PureComponent {
     };
 
     const addStyle = {
+      position: 'absolute',
+      backgroundColor: '#ffffff',
       top: (height/2) + 25,
       left: ((width/2) - 25),
       width: 50,
@@ -49,74 +83,37 @@ class Start extends PureComponent {
     };
 
     return (
-      <Group
-        style={groupStyle}
-      >
-        <Group style={addStyle} onTouchStart={() => { console.log('you clicked me'); }}>
-          <Gradient
-            style={addStyle}
-            colorStops={[{ color: "#fff", position: 0 }]}
-          />
-        </Group>
-        <Image
-          src="https://unsplash.it/800/300"
-          style={snapshotStyles}
-        />
-      </Group>
+      <Fade key={value}>
+        <div
+          style={groupStyle}
+        >
+          <div style={snapshotStyles}>Snapshot {value}</div>
+          <div style={addStyle} onClick={() => { this.addItem(index); }}>add</div>
+        </div>
+      </Fade>
     );
-    // Render the item at the given index, usually a <Group>
   }
 
-  getListViewStyle() {
-    const surfaceWidth = window.innerWidth;
-    const surfaceHeight = window.innerHeight;
-
-    return {
-      top: 0,
-      left: 0,
-      width: surfaceWidth,
-      height: surfaceHeight,
-    };
+  getItems() {
+    return this.state.items.map(this.renderItem);
   }
 
-  componentDidMount() {
-    this.node.addEventListener(
-      'wheel',
-      (e) => {
-        if(!this.list) { return; }
-        this.list.doScroll(e);
-      }
-    );
+  addItem = (index) => {
+    console.log(index);
+    const newItem = this.state.items.length + 1;
+    const newItems = [...this.state.items.slice(0, index), newItem, ...this.state.items.slice(index) ];
+    this.setState({ items: newItems });
   }
 
   render() {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
-    const textStyles = {
-      top: 0,
-      left: 0,
-      width: surfaceWidth,
-      height: 20,
-      lineHeight: 20,
-      fontSize: 12,
-      color: '#ffffff',
-    };
-
     return (
-      <div ref={(node) => { this.node = node; }}>
-        <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-          <Text style={textStyles}>
-            Here is some text below an image.
-          </Text>
-          <MyListView
-            style={this.getListViewStyle()}
-            numberOfItemsGetter={this.getNumberOfItems}
-            itemHeightGetter={this.getItemHeight}
-            itemGetter={this.renderItem}
-            ref={(list) => { this.list = list; }}
-          />
-        </Surface>
+      <div style={{ width: surfaceWidth, height: surfaceHeight, top: 0, left: 0, position: 'absolute', overflow: 'scroll'}}>
+        <TransitionGroup>
+          {this.getItems()}
+        </TransitionGroup>
       </div>
     );
   }
