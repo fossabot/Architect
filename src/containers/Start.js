@@ -45,6 +45,7 @@ class Start extends PureComponent {
 
     this.state = {
       items: [1],
+      styles: { transform: 'perspective(500px) scale3d(1, 1, 1)' },
     };
   }
 
@@ -105,15 +106,35 @@ class Start extends PureComponent {
     this.setState({ items: newItems });
   }
 
+  zoom = () => {
+    this.setState({
+      styles: {
+        transform: 'perspective(500px) scale3d(0, 0, 1)',
+        transition: 'none',
+      }
+    }, () => {
+      setTimeout(() => {
+        this.setState({
+          styles: {
+            transform: 'perspective(500px) scale3d(1, 1, 1)'
+          }
+        })
+      }, 1);
+    })
+  }
+
   render() {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
     return (
-      <div style={{ width: surfaceWidth, height: surfaceHeight, top: 0, left: 0, position: 'absolute', overflow: 'scroll'}}>
-        <TransitionGroup>
-          {this.getItems()}
-        </TransitionGroup>
+      <div>
+        <div style={{ transition: 'all 500ms ease', width: surfaceWidth, height: surfaceHeight, top: 0, left: 0, position: 'absolute', overflow: 'scroll', ...this.state.styles }}>
+          <TransitionGroup>
+            {this.getItems()}
+          </TransitionGroup>
+        </div>
+        <div style={{ top: 0, left: 0, position: 'absolute' }} onClick={this.zoom}>Zoom!</div>
       </div>
     );
   }
