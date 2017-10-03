@@ -3,6 +3,15 @@
 import React, { PureComponent } from 'react';
 import ReactCanvas, { Gradient, Group, Image, ListView, Surface, Text } from 'react-canvas';
 
+class MyListView extends ListView {
+  doScroll(e) {
+    if (this.scroller) {
+      this.scroller.scrollBy(0, e.deltaY, true);
+      this.scroller.doTouchMove([e], e.timeStamp);
+    }
+  };
+}
+
 class Start extends PureComponent {
 
   getNumberOfItems() {
@@ -15,7 +24,8 @@ class Start extends PureComponent {
     return surfaceHeight / 2;
   }
 
-  renderItem = () => {
+  renderItem = (index) => {
+
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
@@ -42,7 +52,7 @@ class Start extends PureComponent {
       <Group
         style={groupStyle}
       >
-        <Group style={addStyle}>
+        <Group style={addStyle} onTouchStart={() => { console.log('you clicked me'); }}>
           <Gradient
             style={addStyle}
             colorStops={[{ color: "#fff", position: 0 }]}
@@ -69,6 +79,16 @@ class Start extends PureComponent {
     };
   }
 
+  componentDidMount() {
+    this.node.addEventListener(
+      'wheel',
+      (e) => {
+        if(!this.list) { return; }
+        this.list.doScroll(e);
+      }
+    );
+  }
+
   render() {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
@@ -84,17 +104,20 @@ class Start extends PureComponent {
     };
 
     return (
-      <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <Text style={textStyles}>
-          Here is some text below an image.
-        </Text>
-        <ListView
-          style={this.getListViewStyle()}
-          numberOfItemsGetter={this.getNumberOfItems}
-          itemHeightGetter={this.getItemHeight}
-          itemGetter={this.renderItem}
-        />
-      </Surface>
+      <div ref={(node) => { this.node = node; }}>
+        <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
+          <Text style={textStyles}>
+            Here is some text below an image.
+          </Text>
+          <MyListView
+            style={this.getListViewStyle()}
+            numberOfItemsGetter={this.getNumberOfItems}
+            itemHeightGetter={this.getItemHeight}
+            itemGetter={this.renderItem}
+            ref={(list) => { this.list = list; }}
+          />
+        </Surface>
+      </div>
     );
   }
 }
