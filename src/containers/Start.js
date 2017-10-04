@@ -5,15 +5,6 @@ import ReactCanvas, { Gradient, Group, Image, Surface, Text } from 'react-canvas
 import ListView from './ListView';
 import { constant, times, debounce } from 'lodash';
 
-class MyListView extends ListView {
-  doScroll(e) {
-    if (this.scroller) {
-      this.scroller.scrollBy(0, e.deltaY, true);
-      this.scroller.doTouchMove([e], e.timeStamp);
-    }
-  };
-}
-
 class Start extends PureComponent {
 
   constructor(props) {
@@ -25,7 +16,6 @@ class Start extends PureComponent {
   }
 
   getNumberOfItems = () => {
-    console.log('items', this.state.items);
     return this.state.items.length;
   }
 
@@ -117,7 +107,7 @@ class Start extends PureComponent {
 
   doScroll(e) {
     if(!this.list) { return; }
-    this.list.doScroll(e);
+    this.list.mouseScroll(e);
   }
 
   componentDidMount() {
@@ -125,7 +115,7 @@ class Start extends PureComponent {
     this.node.addEventListener(
       'wheel',
       (e) => {
-        this.doScrollDebounced(e);
+        this.doScroll(e);
       }
     );
   }
@@ -150,7 +140,7 @@ class Start extends PureComponent {
           <Text style={textStyles}>
             Here is some text below an image.
           </Text>
-          <MyListView
+          <ListView
             style={this.getListViewStyle()}
             numberOfItemsGetter={this.getNumberOfItems}
             itemHeightGetter={this.getItemHeight}

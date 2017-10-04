@@ -26,15 +26,6 @@ class ListView extends PureComponent {
     };
   }
 
-  getDefaultProps() {
-    return {
-      style: { left: 0, top: 0, width: 0, height: 0 },
-      snapping: false,
-      scrollingDeceleration: 0.95,
-      scrollingPenetrationAcceleration: 0.08,
-    };
-  }
-
   componentDidMount() {
     this.createScroller();
     this.updateScrollingDimensions();
@@ -105,6 +96,13 @@ class ListView extends PureComponent {
     this.setState({ scrollTop: top });
     if (this.props.onScroll) {
       this.props.onScroll(top);
+    }
+  }
+
+  mouseScroll(e) {
+    if (this.scroller) {
+      this.scroller.scrollBy(0, e.deltaY, false);
+      // this.scroller.doTouchMove([e], e.timeStamp);
     }
   }
 
@@ -199,5 +197,12 @@ class ListView extends PureComponent {
     this.scroller.__maxDecelerationScrollTop = targetScrollTop;
   }
 }
+
+ListView.defaultProps = {
+  style: { left: 0, top: 0, width: 0, height: 0 },
+  snapping: false,
+  scrollingDeceleration: 0.95,
+  scrollingPenetrationAcceleration: 0.08,
+};
 
 export default ListView;
