@@ -2,34 +2,40 @@
 
 import React, { PureComponent } from 'react';
 import ReactCanvas, { Gradient, Group, Image, Surface, Text } from 'react-canvas';
-import ListView from './ListView';
+
 import { constant, times, debounce } from 'lodash';
+import ListView from './ListView';
+import ListItem from './ListItem';
 
 class Start extends PureComponent {
 
   constructor(props) {
+    const surfaceHeight = window.innerHeight;
+
     super(props);
 
     this.state = {
-      items: times(5, constant({ title: 'foo' })),
+      targetHeight: surfaceHeight / 2,
+      items: times(5, constant({ title: 'foo', height: surfaceHeight / 2 })),
     };
+
+    console.log(this.state);
+    this.update();
   }
 
   getNumberOfItems = () => {
     return this.state.items.length;
   }
 
-  getItemHeight(index) {
-    const surfaceHeight = window.innerHeight;
-
-    return surfaceHeight / 2;
+  getItemHeight = (index) => {
+    return this.state.items[index].height;
   }
 
-  addAtItem(index) {
+  addAtItem = (index) => {
     this.setState({
       items: [
         ...this.state.items.slice(0, index + 1),
-        { title: 'bar' },
+        { title: 'bar', height: 1 },
         ...this.state.items.slice(index + 1),
       ],
     }, () => {
@@ -38,71 +44,24 @@ class Start extends PureComponent {
     });
   }
 
-  renderItem = (index) => {
-    const surfaceWidth = window.innerWidth;
-    const surfaceHeight = window.innerHeight;
+  update() {
+    const items = this.state.items.map((item) => {
+      if (item.height > this.state.targetHeight) { return item; }
+      return {
+        ...item,
+        height: item.height + ((this.state.targetHeight - item.height) / 2) + 1,
+      }
+    });
 
-    const height = this.getItemHeight(index);
-    const width = surfaceWidth;
+    this.setState({
+      items
+    });
 
-    const item = this.state.items[index];
-
-    const groupStyle = { top: 0, left: 0, width, height };
-
-    const snapshotStyles = {
-      height: height/2,
-      width: height/2,
-      top: 0,
-      left: ((width/2) - (height/4)),
-    };
-
-    const addStyle = {
-      top: (height/2) + 25,
-      left: ((width/2) - 25),
-      width: 50,
-      height: 50,
-    };
-
-    const textStyles = {
-      top: 0,
-      left: 0,
-      width: surfaceWidth,
-      height: 20,
-      lineHeight: 20,
-      fontSize: 12,
-      color: '#808080',
-    };
-
-    return (
-      <Group
-        style={groupStyle}
-      >
-        <Group style={addStyle} onClick={() => { this.addAtItem(index); }}>
-          <Gradient
-            style={addStyle}
-            colorStops={[{ color: "#fff", position: 0 }]}
-          />
-        </Group>
-        <Text style={textStyles}>{ item.title }</Text>
-        <Image
-          src="https://unsplash.it/400/300"
-          style={snapshotStyles}
-        />
-      </Group>
-    );
-    // Render the item at the given index, usually a <Group>
+    requestAnimationFrame(() => this.update());
   }
 
-  getListViewStyle() {
-    const surfaceWidth = window.innerWidth;
-    const surfaceHeight = window.innerHeight;
-
-    return {
-      top: 0,
-      left: 0,
-      width: surfaceWidth,
-      height: surfaceHeight,
-    };
+  renderItem = (index) => {
+    return <ListItem index={index} addAtItem={this.addAtItem} title={this.state.items[index].title} />;
   }
 
   doScroll(e) {
@@ -124,6 +83,14 @@ class Start extends PureComponent {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
+    const listViewStyle = {
+      top: 0,
+      left: 0,
+      width: surfaceWidth,
+      height: surfaceHeight,
+      alpha: 0.5,
+    };
+
     const textStyles = {
       top: 0,
       left: 100,
@@ -141,7 +108,7 @@ class Start extends PureComponent {
             Here is some text below an image.
           </Text>
           <ListView
-            style={this.getListViewStyle()}
+            style={listViewStyle}
             numberOfItemsGetter={this.getNumberOfItems}
             itemHeightGetter={this.getItemHeight}
             itemGetter={this.renderItem}

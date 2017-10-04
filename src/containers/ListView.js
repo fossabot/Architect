@@ -129,8 +129,7 @@ class ListView extends PureComponent {
 
   itemHeights() {
     const numberOfItems = this.props.numberOfItemsGetter();
-    if (this._numberOfItems !== numberOfItems || !this._itemHeights) {
-      console.log('recalc heights');
+    if (true || this._numberOfItems !== numberOfItems || !this._itemHeights) { // eslint-disable-line no-constant-condition, max-len
       this._itemHeights = map(
         times(numberOfItems, constant(0)),
         (_, index) => this.props.itemHeightGetter(index),
