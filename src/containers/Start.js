@@ -1,7 +1,9 @@
 /* eslint-disable */
 
 import React, { PureComponent } from 'react';
-import ReactCanvas, { Gradient, Group, Image, ListView, Surface, Text } from 'react-canvas';
+import ReactCanvas, { Gradient, Group, Image, Surface, Text } from 'react-canvas';
+import ListView from './ListView';
+import { constant, times, debounce } from 'lodash';
 
 class MyListView extends ListView {
   doScroll(e) {
@@ -14,23 +16,46 @@ class MyListView extends ListView {
 
 class Start extends PureComponent {
 
-  getNumberOfItems() {
-    return 10;
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      items: times(5, constant({ title: 'foo' })),
+    };
   }
 
-  getItemHeight() {
+  getNumberOfItems = () => {
+    console.log('items', this.state.items);
+    return this.state.items.length;
+  }
+
+  getItemHeight(index) {
     const surfaceHeight = window.innerHeight;
 
     return surfaceHeight / 2;
   }
 
-  renderItem = (index) => {
+  addAtItem(index) {
+    this.setState({
+      items: [
+        ...this.state.items.slice(0, index + 1),
+        { title: 'bar' },
+        ...this.state.items.slice(index + 1),
+      ],
+    }, () => {
+      if (!this.list) { return; }
+      this.list.updateScrollingDimensions();
+    });
+  }
 
+  renderItem = (index) => {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
-    const height = this.getItemHeight();
+    const height = this.getItemHeight(index);
     const width = surfaceWidth;
+
+    const item = this.state.items[index];
 
     const groupStyle = { top: 0, left: 0, width, height };
 
@@ -48,18 +73,29 @@ class Start extends PureComponent {
       height: 50,
     };
 
+    const textStyles = {
+      top: 0,
+      left: 0,
+      width: surfaceWidth,
+      height: 20,
+      lineHeight: 20,
+      fontSize: 12,
+      color: '#808080',
+    };
+
     return (
       <Group
         style={groupStyle}
       >
-        <Group style={addStyle} onTouchStart={() => { console.log('you clicked me'); }}>
+        <Group style={addStyle} onClick={() => { this.addAtItem(index); }}>
           <Gradient
             style={addStyle}
             colorStops={[{ color: "#fff", position: 0 }]}
           />
         </Group>
+        <Text style={textStyles}>{ item.title }</Text>
         <Image
-          src="https://unsplash.it/800/300"
+          src="https://unsplash.it/400/300"
           style={snapshotStyles}
         />
       </Group>
@@ -79,12 +115,17 @@ class Start extends PureComponent {
     };
   }
 
+  doScroll(e) {
+    if(!this.list) { return; }
+    this.list.doScroll(e);
+  }
+
   componentDidMount() {
+    this.doScrollDebounced = debounce(this.doScroll, 1000/60);
     this.node.addEventListener(
       'wheel',
       (e) => {
-        if(!this.list) { return; }
-        this.list.doScroll(e);
+        this.doScrollDebounced(e);
       }
     );
   }
@@ -95,7 +136,7 @@ class Start extends PureComponent {
 
     const textStyles = {
       top: 0,
-      left: 0,
+      left: 100,
       width: surfaceWidth,
       height: 20,
       lineHeight: 20,
