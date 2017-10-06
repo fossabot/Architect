@@ -1,16 +1,35 @@
 /* eslint-disable */
 
 import React, { PureComponent } from 'react';
-import ReactCanvas, { Gradient, Group, Image, Surface, Text } from 'react-canvas';
 import ListView from './ListView';
 import { constant, times, debounce } from 'lodash';
+import { Group, Image } from 'react-konva';
 
 class ListItem extends PureComponent {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      image: null,
+    };
+  }
 
   getItemHeight(index) {
     const surfaceHeight = window.innerHeight;
 
     return surfaceHeight / 2;
+  }
+
+
+  componentDidMount() {
+    const image = new window.Image();
+    image.src = 'http://konvajs.github.io/assets/yoda.jpg';
+    image.onload = () => {
+      this.setState({
+        image: image
+      });
+    }
   }
 
   render() {
@@ -20,18 +39,18 @@ class ListItem extends PureComponent {
     const height = this.getItemHeight(index);
     const width = surfaceWidth;
 
-    const groupStyle = { top: 0, left: 0, width, height };
+    const groupProps = { top: 0, left: 0, width, height };
 
-    const snapshotStyles = {
+    const snapshotProps = {
       height: height / 2,
       width: height / 2,
-      top: 0,
-      left: ((width / 2) - (height / 4)),
+      y: 0,
+      x: ((width / 2) - (height / 4)),
     };
 
     const addStyle = {
-      top: (height / 2) + 25,
-      left: ((width / 2) - 25),
+      y: (height / 2) + 25,
+      x: ((width / 2) - 25),
       width: 50,
       height: 50,
     };
@@ -48,23 +67,25 @@ class ListItem extends PureComponent {
 
     return (
       <Group
-        style={groupStyle}
+        {...groupProps}
       >
-        <Group style={addStyle} onClick={() => { this.props.addAtItem(index); }}>
-          <Gradient
-            style={addStyle}
-            colorStops={[{ color: "#fff", position: 0 }]}
-          />
-        </Group>
-        <Text style={textStyles}>{ this.props.title }</Text>
+
         <Image
-          src={`https://unsplash.it/800/600`}
-          style={snapshotStyles}
+          image={this.state.image}
+          {...snapshotProps}
         />
       </Group>
     );
     // Render the item at the given index, usually a <Group>
   }
 }
+
+// <Group style={addStyle} onClick={() => { this.props.addAtItem(index); }}>
+//   <Gradient
+//     style={addStyle}
+//     colorStops={[{ color: "#fff", position: 0 }]}
+//   />
+// </Group>
+// <Text style={textStyles}>{ this.props.title }</Text>
 
 export default ListItem;

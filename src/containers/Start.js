@@ -1,8 +1,7 @@
 /* eslint-disable */
 
 import React, { PureComponent } from 'react';
-import ReactCanvas, { Gradient, Group, Image, Surface, Text } from 'react-canvas';
-
+import { Layer, Rect, Stage, Group } from 'react-konva';
 import { constant, times, debounce } from 'lodash';
 import ListView from './ListView';
 import ListItem from './ListItem';
@@ -103,21 +102,26 @@ class Start extends PureComponent {
 
     return (
       <div ref={(node) => { this.node = node; }}>
-        <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-          <Text style={textStyles}>
-            Here is some text below an image.
-          </Text>
-          <ListView
-            style={listViewStyle}
-            numberOfItemsGetter={this.getNumberOfItems}
-            itemHeightGetter={this.getItemHeight}
-            itemGetter={this.renderItem}
-            ref={(list) => { this.list = list; }}
-          />
-        </Surface>
+        <Stage width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
+          <Layer>
+            <ListView
+              style={listViewStyle}
+              numberOfItemsGetter={this.getNumberOfItems}
+              itemHeightGetter={this.getItemHeight}
+              itemGetter={this.renderItem}
+              ref={(list) => { this.list = list; }}
+            />
+          </Layer>
+        </Stage>
       </div>
     );
   }
 }
+
+
+  // <Text style={textStyles}>
+  //   Here is some text below an image.
+  // </Text>
+
 
 export default Start;

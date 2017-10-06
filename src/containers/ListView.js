@@ -1,10 +1,11 @@
+/* eslint-disable */
 /* eslint-disable react/sort-comp, no-underscore-dangle */
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { sum, map, times, constant } from 'lodash';
 import Scroller from 'scroller';
-import { Group } from 'react-canvas';
+import { Group } from 'react-konva';
 
 class ListView extends PureComponent {
   propTypes = {
@@ -35,35 +36,36 @@ class ListView extends PureComponent {
     const item = this.props.itemGetter(itemIndex, this.state.scrollTop);
     const itemHeight = this.props.itemHeightGetter(itemIndex);
     const style = {
-      top: 0,
-      left: 0,
+      // top: 0,
+      x: 0,
       width: this.props.style.width,
       height: itemHeight,
-      translateY: (itemIndex * itemHeight) - this.state.scrollTop,
+      y: (itemIndex * itemHeight) - this.state.scrollTop,
       zIndex: itemIndex,
     };
 
     return (
-      React.createElement(Group, { style, key: itemIndex },
-        item,
-      )
+      <Group
+        key={itemIndex}
+        { ...style}
+      >
+        {item}
+      </Group>
     );
   }
 
   render() {
     const items = this.getVisibleItemIndexes().map(this.renderItem);
     return (
-      React.createElement(
-        Group,
-        {
-          style: this.props.style,
-          onTouchStart: this.handleTouchStart,
-          onTouchMove: this.handleTouchMove,
-          onTouchEnd: this.handleTouchEnd,
-          onTouchCancel: this.handleTouchEnd,
-        },
-        items,
-      )
+      <Group
+        {...this.props.style}
+        onTouchStart={this.handleTouchStart}
+        onTouchMove={this.handleTouchMove}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchCancel={this.handleTouchEnd}
+      >
+        {items}
+      </Group>
     );
   }
 
