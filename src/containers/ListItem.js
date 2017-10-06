@@ -17,12 +17,6 @@ class ListItem extends PureComponent {
     };
   }
 
-  getItemHeight(index) {
-    const surfaceHeight = window.innerHeight;
-
-    return surfaceHeight / 2;
-  }
-
 
   componentDidMount() {
     const image = new window.Image();
@@ -37,8 +31,9 @@ class ListItem extends PureComponent {
   render() {
     const index = this.props.index;
     const surfaceWidth = window.innerWidth;
+    const surfaceHeight = window.innerHeight;
 
-    const height = this.getItemHeight(index);
+    const height = surfaceHeight / 2;
     const width = surfaceWidth;
 
     const groupProps = {
