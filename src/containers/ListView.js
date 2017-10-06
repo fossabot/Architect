@@ -10,8 +10,8 @@ import { Group, Rect } from 'react-konva';
 class ListView extends PureComponent {
   propTypes = {
     style: PropTypes.object,
-    numberOfItemsGetter: PropTypes.func.isRequired,
-    itemHeightGetter: PropTypes.func.isRequired,
+    numberOfItems: PropTypes.number,
+    itemPropsGetter: PropTypes.func.isRequired,
     itemGetter: PropTypes.func.isRequired,
     snapping: PropTypes.bool,
     scrollingDeceleration: PropTypes.number,
@@ -34,7 +34,7 @@ class ListView extends PureComponent {
 
   renderItem = (itemIndex) => {
     const item = this.props.itemGetter(itemIndex, this.state.scrollTop);
-    const itemHeight = this.props.itemHeightGetter(itemIndex);
+    const itemHeight = this.props.itemPropsGetter(itemIndex).height;
     const itemHeights = sum(this.itemHeights().slice(0, itemIndex));
     const style = {
       // top: 0,
@@ -135,18 +135,18 @@ class ListView extends PureComponent {
   }
 
   itemHeights() {
-    const numberOfItems = this.props.numberOfItemsGetter();
+    const numberOfItems = this.props.numberOfItems;
 
     return map(
       times(numberOfItems, constant(0)),
-      (_, index) => this.props.itemHeightGetter(index),
+      (_, index) => this.props.itemPropsGetter(index).height,
     );
   }
 
   getVisibleItemIndexes() {
     const itemIndexes = [];
     const itemHeights = this.itemHeights();
-    const itemCount = this.props.numberOfItemsGetter();
+    const itemCount = this.props.numberOfItems;
     const scrollTop = this.state.scrollTop;
     let itemScrollTop = 0;
 
@@ -184,7 +184,7 @@ class ListView extends PureComponent {
     // Find the page whose estimated end scrollTop is closest to 0.
     let closestZeroDelta = Infinity;
     const itemHeights = this.itemHeights();
-    const pageCount = this.props.numberOfItemsGetter();
+    const pageCount = this.props.numberOfItems;
     let pageScrollTop;
 
     for (let pageIndex = 0, len = pageCount; pageIndex < len; pageIndex += 1) {

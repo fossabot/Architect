@@ -18,10 +18,7 @@ class Timeline extends PureComponent {
     this.update();
   }
 
-  getNumberOfItems = () => this.state.items.length;
-
-  getItemHeight = index =>
-    (this.state.items[index].height * this.state.items[index].scaleY);
+  getItemProps = index => this.state.items[index];
 
   addAtItem = (index) => {
     this.setState({
@@ -53,9 +50,8 @@ class Timeline extends PureComponent {
   renderItem = index => (
     <ListItem
       index={index}
-      scaleY={this.state.items[index].scaleY}
       addAtItem={this.addAtItem}
-      title={this.state.items[index].title}
+      {...this.getItemProps(index)}
     />
   );
 
@@ -81,8 +77,8 @@ class Timeline extends PureComponent {
         <Layer>
           <ListView
             style={listViewStyle}
-            numberOfItemsGetter={this.getNumberOfItems}
-            itemHeightGetter={this.getItemHeight}
+            numberOfItems={this.state.items.length}
+            itemPropsGetter={this.getItemProps}
             itemGetter={this.renderItem}
             ref={(list) => { this.list = list; }}
           />
