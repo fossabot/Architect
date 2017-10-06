@@ -59,17 +59,17 @@ class ListView extends PureComponent {
     return (
       <Group
         {...this.props.style}
+        onTouchStart={this.handleTouchStart}
+        onTouchMove={this.handleTouchMove}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchCancel={this.handleTouchEnd}
+        onWheel={this.handleMouseWheel}
       >
-        {items}
         <Rect
           width={this.props.style.width}
           height={this.props.style.height}
-          onTouchStart={this.handleTouchStart}
-          onTouchMove={this.handleTouchMove}
-          onTouchEnd={this.handleTouchEnd}
-          onTouchCancel={this.handleTouchEnd}
-          onWheel={this.handleMouseWheel}
         ></Rect>
+        {items}
       </Group>
     );
   }

@@ -101,7 +101,13 @@ class Start extends PureComponent {
 
     return (
       <div ref={(node) => { this.node = node; }}>
-        <Stage width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
+        <Stage
+          width={surfaceWidth}
+          height={surfaceHeight}
+          left={0}
+          top={0}
+          onWheel={(e) => { console.log(e); }}
+        >
           <Layer>
             <ListView
               style={listViewStyle}

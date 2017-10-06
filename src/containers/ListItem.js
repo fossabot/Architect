@@ -3,7 +3,7 @@
 import React, { PureComponent } from 'react';
 import ListView from './ListView';
 import { constant, times, debounce } from 'lodash';
-import { Group, Image } from 'react-konva';
+import { Group, Image, Text, Rect } from 'react-konva';
 
 class ListItem extends PureComponent {
 
@@ -39,7 +39,12 @@ class ListItem extends PureComponent {
     const height = this.getItemHeight(index);
     const width = surfaceWidth;
 
-    const groupProps = { top: 0, left: 0, width, height };
+    const groupProps = {
+      y: 0,
+      x: 0,
+      width,
+      height,
+    };
 
     const snapshotProps = {
       height: height / 2,
@@ -53,39 +58,39 @@ class ListItem extends PureComponent {
       x: ((width / 2) - 25),
       width: 50,
       height: 50,
+      fill: 'white',
     };
 
     const textStyles = {
-      top: 0,
-      left: 0,
+      y: 0,
+      x: 0,
       width: surfaceWidth,
       height: 20,
-      lineHeight: 20,
-      fontSize: 12,
-      color: '#808080',
+      fontSize: 30,
+      fontFamily: 'Calibri',
+      fill: 'green'
     };
 
     return (
       <Group
         {...groupProps}
       >
-
+        <Text
+          {...textStyles}
+          text={this.props.title}
+        />
         <Image
           image={this.state.image}
           {...snapshotProps}
+        />
+        <Rect
+          {...addStyle}
+          onClick={() => { this.props.addAtItem(index); }}
         />
       </Group>
     );
     // Render the item at the given index, usually a <Group>
   }
 }
-
-// <Group style={addStyle} onClick={() => { this.props.addAtItem(index); }}>
-//   <Gradient
-//     style={addStyle}
-//     colorStops={[{ color: "#fff", position: 0 }]}
-//   />
-// </Group>
-// <Text style={textStyles}>{ this.props.title }</Text>
 
 export default ListItem;
