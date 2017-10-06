@@ -83,7 +83,7 @@ class ListItem extends PureComponent {
         />
         <Rect
           {...addStyle}
-          onClick={() => { this.props.addAtItem(index); }}
+          onClick={() => { this.props.addItemAtIndex(index); }}
         />
       </Group>
     );

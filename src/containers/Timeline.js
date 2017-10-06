@@ -20,16 +20,13 @@ class Timeline extends PureComponent {
 
   getItemProps = index => this.state.items[index];
 
-  addAtItem = (index) => {
+  addItemAtIndex = (index) => {
     this.setState({
       items: [
         ...this.state.items.slice(0, index + 1),
         { title: 'bar', height: this.state.targetHeight, scaleY: 0.01 },
         ...this.state.items.slice(index + 1),
       ],
-    }, () => {
-      if (!this.list) { return; }
-      this.list.updateScrollingDimensions();
     });
   }
 
@@ -50,7 +47,7 @@ class Timeline extends PureComponent {
   renderItem = index => (
     <ListItem
       index={index}
-      addAtItem={this.addAtItem}
+      addItemAtIndex={this.addItemAtIndex}
       {...this.getItemProps(index)}
     />
   );
@@ -80,7 +77,6 @@ class Timeline extends PureComponent {
             numberOfItems={this.state.items.length}
             itemPropsGetter={this.getItemProps}
             itemGetter={this.renderItem}
-            ref={(list) => { this.list = list; }}
           />
         </Layer>
       </Stage>

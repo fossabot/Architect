@@ -27,6 +27,12 @@ class ListView extends PureComponent {
     };
   }
 
+  componentWillUpdate(nextProps) {
+    if (nextProps.numberOfItems !== this.props.numberOfItems) {
+      this.updateScrollingDimensions();
+    }
+  }
+
   componentDidMount() {
     this.createScroller();
     this.updateScrollingDimensions();
