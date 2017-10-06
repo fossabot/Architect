@@ -10,6 +10,8 @@ class ListItem extends PureComponent {
   constructor(props) {
     super(props);
 
+    console.log(props);
+
     this.state = {
       image: null,
     };
@@ -74,6 +76,7 @@ class ListItem extends PureComponent {
     return (
       <Group
         {...groupProps}
+        {...this.props}
       >
         <Text
           {...textStyles}

@@ -15,7 +15,7 @@ class Start extends PureComponent {
 
     this.state = {
       targetHeight: surfaceHeight / 2,
-      items: times(5, constant({ title: 'foo', height: surfaceHeight / 2 })),
+      items: times(5, constant({ title: 'foo', height: surfaceHeight / 2, scaleY: 1 })),
     };
 
     console.log(this.state);
@@ -27,14 +27,14 @@ class Start extends PureComponent {
   }
 
   getItemHeight = (index) => {
-    return this.state.items[index].height;
+    return this.state.items[index].height * this.state.items[index].scaleY;
   }
 
   addAtItem = (index) => {
     this.setState({
       items: [
         ...this.state.items.slice(0, index + 1),
-        { title: 'bar', height: 1 },
+        { title: 'bar', height: this.state.targetHeight, scaleY: 0.01 },
         ...this.state.items.slice(index + 1),
       ],
     }, () => {
@@ -45,10 +45,10 @@ class Start extends PureComponent {
 
   update() {
     const items = this.state.items.map((item) => {
-      if (item.height > this.state.targetHeight) { return item; }
+      if (item.scaleY >= 1) { return item; }
       return {
         ...item,
-        height: item.height + ((this.state.targetHeight - item.height) / 2) + 1,
+        scaleY: item.scaleY + ((1 - item.scaleY) / 2) + 0.01,
       }
     });
 
@@ -60,7 +60,14 @@ class Start extends PureComponent {
   }
 
   renderItem = (index) => {
-    return <ListItem index={index} addAtItem={this.addAtItem} title={this.state.items[index].title} />;
+    return (
+      <ListItem
+        index={index}
+        scaleY={this.state.items[index].scaleY}
+        addAtItem={this.addAtItem}
+        title={this.state.items[index].title}
+      />
+    );
   }
 
   doScroll(e) {

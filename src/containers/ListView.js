@@ -35,12 +35,13 @@ class ListView extends PureComponent {
   renderItem = (itemIndex) => {
     const item = this.props.itemGetter(itemIndex, this.state.scrollTop);
     const itemHeight = this.props.itemHeightGetter(itemIndex);
+    const itemHeights = sum(this.itemHeights().slice(0, itemIndex));
     const style = {
       // top: 0,
       x: 0,
       width: this.props.style.width,
       height: itemHeight,
-      y: (itemIndex * itemHeight) - this.state.scrollTop,
+      y: itemHeights - this.state.scrollTop,
       zIndex: itemIndex,
     };
 
