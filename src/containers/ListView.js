@@ -5,7 +5,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { sum, map, times, constant } from 'lodash';
 import Scroller from 'scroller';
-import { Group } from 'react-konva';
+import { Group, Rect } from 'react-konva';
 
 class ListView extends PureComponent {
   propTypes = {
@@ -59,12 +59,17 @@ class ListView extends PureComponent {
     return (
       <Group
         {...this.props.style}
-        onTouchStart={this.handleTouchStart}
-        onTouchMove={this.handleTouchMove}
-        onTouchEnd={this.handleTouchEnd}
-        onTouchCancel={this.handleTouchEnd}
       >
         {items}
+        <Rect
+          width={this.props.style.width}
+          height={this.props.style.height}
+          onTouchStart={this.handleTouchStart}
+          onTouchMove={this.handleTouchMove}
+          onTouchEnd={this.handleTouchEnd}
+          onTouchCancel={this.handleTouchEnd}
+          onWheel={this.handleMouseWheel}
+        ></Rect>
       </Group>
     );
   }
@@ -74,20 +79,20 @@ class ListView extends PureComponent {
 
   handleTouchStart = (e) => {
     if (this.scroller) {
-      this.scroller.doTouchStart(e.touches, e.timeStamp);
+      this.scroller.doTouchStart(e.evt.touches, e.evt.timeStamp);
     }
   }
 
   handleTouchMove = (e) => {
     if (this.scroller) {
-      e.preventDefault();
-      this.scroller.doTouchMove(e.touches, e.timeStamp, e.scale);
+      e.evt.preventDefault();
+      this.scroller.doTouchMove(e.evt.touches, e.evt.timeStamp, e.evt.scale);
     }
   }
 
   handleTouchEnd = (e) => {
     if (this.scroller) {
-      this.scroller.doTouchEnd(e.timeStamp);
+      this.scroller.doTouchEnd(e.evt.timeStamp);
       if (this.props.snapping) {
         this.updateScrollingDeceleration();
       }
@@ -101,10 +106,9 @@ class ListView extends PureComponent {
     }
   }
 
-  mouseScroll(e) {
+  handleMouseWheel = (e) => {
     if (this.scroller) {
-      this.scroller.scrollBy(0, e.deltaY, false);
-      // this.scroller.doTouchMove([e], e.timeStamp);
+      this.scroller.scrollBy(0, e.evt.deltaY, false);
     }
   }
 

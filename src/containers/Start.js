@@ -69,13 +69,12 @@ class Start extends PureComponent {
   }
 
   componentDidMount() {
-    this.doScrollDebounced = debounce(this.doScroll, 1000/60);
-    this.node.addEventListener(
-      'wheel',
-      (e) => {
-        this.doScroll(e);
-      }
-    );
+    // this.node.addEventListener(
+    //   'wheel',
+    //   (e) => {
+    //     this.doScroll(e);
+    //   }
+    // );
   }
 
   render() {
