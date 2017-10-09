@@ -14,9 +14,9 @@ class Timeline extends PureComponent {
     scrollingDeceleration: PropTypes.number,
     scrollingPenetrationAcceleration: PropTypes.number,
     onScroll: PropTypes.func,
-    addStage: PropTypes.func,
-    editStage: PropTypes.func,
-    editSkip: PropTypes.func,
+    onAddStage: PropTypes.func,
+    onEditStage: PropTypes.func,
+    onEditSkip: PropTypes.func,
   };
 
   defaultProps = {
@@ -24,9 +24,9 @@ class Timeline extends PureComponent {
     snapping: false,
     scrollingDeceleration: 0.95,
     scrollingPenetrationAcceleration: 0.08,
-    addStage: () => {},
-    editStage: () => {},
-    editSkip: () => {},
+    onAddStage: () => {},
+    onEditStage: () => {},
+    onEditSkip: () => {},
   };
 
   constructor(props) {
@@ -39,23 +39,30 @@ class Timeline extends PureComponent {
       scrollTop: 0,
       width: surfaceWidth,
       height: surfaceHeight,
-      items: this.itemStates(),
+      items: this.itemStates(this.props.items),
     };
   }
 
   componentDidMount() {
-    this.update();
     this.createScroller();
     this.updateScrollingDimensions();
   }
 
-  itemStates = () => {
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      items: this.itemStates(newProps.items),
+    }, () => {
+      this.updateScrollingDimensions();
+    });
+  }
+
+  itemStates = (items) => {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
 
     const itemHeight = surfaceHeight * (2 / 3);
 
-    return this.props.items.map(
+    return items.map(
       (item, index) =>
         ({
           title: item.title,
@@ -66,12 +73,6 @@ class Timeline extends PureComponent {
           x: 0,
         }),
     );
-  }
-
-  update() {
-    this.setState({
-      items: this.itemStates(),
-    });
   }
 
   itemCount = () => this.state.items.length;
@@ -92,9 +93,9 @@ class Timeline extends PureComponent {
       <Group key={index} {...style}>
         <TimelineStage
           {...item}
-          addStage={() => this.props.addStage(index)}
-          editStage={() => this.props.editStage(index)}
-          editSkip={() => this.props.editSkip(index)}
+          onAddStage={() => this.props.onAddStage(index)}
+          onEditStage={() => this.props.onEditStage(index)}
+          onEditSkip={() => this.props.onEditSkip(index)}
         />
       </Group>
     );

@@ -3,6 +3,25 @@ import PropTypes from 'prop-types';
 import { Group, Image, Rect, Text } from 'react-konva';
 
 class TimelineStage extends PureComponent {
+  propTypes = {
+    type: PropTypes.string.isRequired,
+    width: PropTypes.number,
+    height: PropTypes.number,
+    title: PropTypes.title,
+    onAddStage: PropTypes.func,
+    onEditStage: PropTypes.func,
+    onEditSkip: PropTypes.func,
+  };
+
+  defaultProps = {
+    width: 0,
+    height: 0,
+    title: '',
+    onAddStage: () => {},
+    onEditStage: () => {},
+    onEditSkip: () => {},
+  };
+
   constructor(props) {
     super(props);
 
@@ -83,33 +102,14 @@ class TimelineStage extends PureComponent {
         <Image
           image={image}
           {...snapshotProps}
-          onClick={this.props.editStage}
+          onClick={this.props.onEditStage}
         />
 
-        <Rect {...addProps} onClick={this.props.addStage} />
-        <Rect {...ruleProps} onClick={this.props.editSkip} />
+        <Rect {...addProps} onClick={this.props.onAddStage} />
+        <Rect {...ruleProps} onClick={this.props.onEditSkip} />
       </Group>
     );
   }
 }
-
-TimelineStage.propTypes = {
-  type: PropTypes.string.isRequired,
-  width: PropTypes.number,
-  height: PropTypes.number,
-  title: PropTypes.title,
-  addStage: PropTypes.func,
-  editStage: PropTypes.func,
-  editSkip: PropTypes.func,
-};
-
-TimelineStage.defaultProps = {
-  width: 0,
-  height: 0,
-  title: '',
-  addStage: () => {},
-  editStage: () => {},
-  editSkip: () => {},
-};
 
 export default TimelineStage;
