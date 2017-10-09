@@ -1,9 +1,10 @@
+/* eslint-disable */
 /* eslint-disable react/sort-comp, no-underscore-dangle */
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
-import { map, sum, filter } from 'lodash';
+import { map, sum, filter, compact } from 'lodash';
 import Scroller from 'scroller';
 import TimelineStage from './TimelineStage';
 
@@ -35,6 +36,8 @@ class Timeline extends PureComponent {
       height: surfaceHeight,
       items: this.itemStates(),
     };
+
+    console.log(this.state.items);
   }
 
   componentDidMount() {
@@ -74,12 +77,11 @@ class Timeline extends PureComponent {
 
   renderItem = (index) => {
     const item = this.getItem(index);
-    const itemHeights = item.y;
     const style = {
       width: item.width,
       height: item.height,
       x: 0,
-      y: itemHeights - this.state.scrollTop,
+      y: item.y - this.state.scrollTop,
       zIndex: index,
     };
 
@@ -173,7 +175,7 @@ class Timeline extends PureComponent {
     const width = this.state.width;
     const height = this.state.height;
     const scrollWidth = width;
-    const scrollHeight = sum(this.itemHeights()) + height;
+    const scrollHeight = sum(this.itemHeights()) + height; // scroll past end
     this.scroller.setDimensions(width, height, scrollWidth, scrollHeight);
   }
 
@@ -188,20 +190,15 @@ class Timeline extends PureComponent {
       items,
     } = this.state;
 
-    const isOffScreen = (itemScrollTop, screenHeight) =>
-      ((itemScrollTop >= screenHeight) || (itemScrollTop <= -screenHeight));
+    const isOnScreen = (itemHeight, itemScrollTop, screenHeight) =>
+      ((itemScrollTop <= screenHeight) && (itemScrollTop + itemHeight >= 0));
 
-    const onScreen = filter(
+    const itemsOnScreen = map(
       items,
-      (item) => {
-        if (isOffScreen(item.y - scrollTop, height)) {
-          return false;
-        }
-        return true;
-      },
+      (item, index) => isOnScreen(item.height, item.y - scrollTop, height) ? index : null,
     );
 
-    return map(onScreen, (item, index) => index);
+    return filter(itemsOnScreen, (index) => index !== null);
   }
 
   updateScrollingDeceleration() {

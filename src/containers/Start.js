@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
-import { constant, times } from 'lodash';
+import { times, random } from 'lodash';
 import Timeline from './Timeline';
 
-const items = times(5, constant({ title: 'foo', type: 'name-generator' }));
+
+const items = times(5, () => ({ title: `foo ${random(0, 100)}`, type: 'name-generator' }));
 
 class Start extends PureComponent {
   addStage = () => {
@@ -24,6 +25,7 @@ class Start extends PureComponent {
   };
 
   render() {
+    console.log(items);
     return (
       <Timeline
         items={items}
