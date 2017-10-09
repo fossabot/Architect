@@ -3,7 +3,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
-import { map, constant, times, sum } from 'lodash';
+import { map, sum, filter } from 'lodash';
 import Scroller from 'scroller';
 import ProtocolStage from './ProtocolStage';
 
@@ -33,7 +33,7 @@ class Timeline extends PureComponent {
       scrollTop: 0,
       width: surfaceWidth,
       height: surfaceHeight,
-      stages: map(props.stages, constant({ title: 'foo', height: surfaceHeight / 2, scaleY: 1 })),
+      stages: this.listViewState(props.stages),
     };
   }
 
@@ -42,19 +42,32 @@ class Timeline extends PureComponent {
     this.updateScrollingDimensions();
   }
 
+  listViewState = (stages) => {
+    const surfaceWidth = window.innerWidth;
+    const surfaceHeight = window.innerHeight;
+    const stageHeight = surfaceHeight / 2;
+    return stages.map((stage, index) => (
+      {
+        title: stage.title,
+        height: stageHeight,
+        width: surfaceWidth,
+        y: stageHeight * index,
+        x: 0,
+      }
+    ));
+  }
+
   itemCount = () => this.state.stages.length;
 
   getItem = index => this.state.stages[index];
 
   renderItem = (index) => {
     const item = this.getItem(index);
-    const itemHeight = item.height;
-    const itemHeights = sum(this.itemHeights().slice(0, index));
+    const itemHeights = item.y;
     const style = {
-      // top: 0,
+      width: item.width,
+      height: item.height,
       x: 0,
-      width: this.state.width,
-      height: itemHeight,
       y: itemHeights - this.state.scrollTop,
       zIndex: index,
     };
@@ -155,39 +168,30 @@ class Timeline extends PureComponent {
   }
 
   itemHeights() {
-    const numberOfItems = this.itemCount();
-
-    return map(
-      times(numberOfItems, constant(0)),
-      (_, index) => this.getItem(index).height,
-    );
+    return map(this.state.stages, 'height');
   }
 
   getVisibleItemIndexes() {
-    const itemIndexes = [];
-    const itemHeights = this.itemHeights();
-    const itemCount = this.itemCount();
-    const scrollTop = this.state.scrollTop;
-    let itemScrollTop = 0;
+    const {
+      height,
+      scrollTop,
+      stages,
+    } = this.state;
 
-    for (let index = 0; index < itemCount; index += 1) {
-      itemScrollTop = sum(itemHeights.slice(0, index)) - scrollTop;
+    const isOffScreen = (itemScrollTop, screenHeight) =>
+      ((itemScrollTop >= screenHeight) || (itemScrollTop <= -screenHeight));
 
-      // Item is completely off-screen bottom
-      if (itemScrollTop >= this.state.height) {
-        continue; // eslint-disable-line no-continue
-      }
+    const onScreen = filter(
+      stages,
+      (item) => {
+        if (isOffScreen(item.y - scrollTop, height)) {
+          return false;
+        }
+        return true;
+      },
+    );
 
-      // Item is completely off-screen top
-      if (itemScrollTop <= -this.state.height) {
-        continue; // eslint-disable-line no-continue
-      }
-
-      // Part of item is on-screen.
-      itemIndexes.push(index);
-    }
-
-    return itemIndexes;
+    return map(onScreen, (item, index) => index);
   }
 
   updateScrollingDeceleration() {
