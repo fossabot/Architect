@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { constant, times } from 'lodash';
 import Timeline from './Timeline';
 
-const stages = times(5, constant({ title: 'foo' }));
+const items = times(5, constant({ title: 'foo', type: 'name-generator' }));
 
 class Start extends PureComponent {
   addStage = () => {
@@ -26,7 +26,7 @@ class Start extends PureComponent {
   render() {
     return (
       <Timeline
-        stages={stages}
+        items={items}
         addStage={this.addStage}
         editStage={this.editStage}
         editSkip={this.editSkip}

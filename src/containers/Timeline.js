@@ -5,11 +5,11 @@ import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
 import { map, sum, filter } from 'lodash';
 import Scroller from 'scroller';
-import ProtocolStage from './ProtocolStage';
+import TimelineStage from './TimelineStage';
 
 class Timeline extends PureComponent {
   propTypes = {
-    stages: PropTypes.array,
+    items: PropTypes.array,
     snapping: PropTypes.bool,
     scrollingDeceleration: PropTypes.number,
     scrollingPenetrationAcceleration: PropTypes.number,
@@ -17,7 +17,7 @@ class Timeline extends PureComponent {
   };
 
   defaultProps = {
-    stages: [],
+    item: [],
     snapping: false,
     scrollingDeceleration: 0.95,
     scrollingPenetrationAcceleration: 0.08,
@@ -33,33 +33,44 @@ class Timeline extends PureComponent {
       scrollTop: 0,
       width: surfaceWidth,
       height: surfaceHeight,
-      stages: this.listViewState(props.stages),
+      items: this.itemStates(),
     };
   }
 
   componentDidMount() {
+    this.update();
     this.createScroller();
     this.updateScrollingDimensions();
   }
 
-  listViewState = (stages) => {
+  itemStates = () => {
     const surfaceWidth = window.innerWidth;
     const surfaceHeight = window.innerHeight;
-    const stageHeight = surfaceHeight / 2;
-    return stages.map((stage, index) => (
-      {
-        title: stage.title,
-        height: stageHeight,
-        width: surfaceWidth,
-        y: stageHeight * index,
-        x: 0,
-      }
-    ));
+
+    const itemHeight = surfaceHeight / 2;
+
+    return this.props.items.map(
+      (item, index) =>
+        ({
+          title: item.title,
+          type: item.type,
+          height: itemHeight,
+          width: surfaceWidth,
+          y: itemHeight * index,
+          x: 0,
+        }),
+    );
   }
 
-  itemCount = () => this.state.stages.length;
+  update() {
+    this.setState({
+      items: this.itemStates(),
+    });
+  }
 
-  getItem = index => this.state.stages[index];
+  itemCount = () => this.state.items.length;
+
+  getItem = index => this.state.items[index];
 
   renderItem = (index) => {
     const item = this.getItem(index);
@@ -74,7 +85,7 @@ class Timeline extends PureComponent {
 
     return (
       <Group key={index} {...style}>
-        <ProtocolStage />
+        <TimelineStage {...item} />
       </Group>
     );
   }
@@ -144,7 +155,6 @@ class Timeline extends PureComponent {
     }
   }
 
-
   // Scrolling
   // =========
 
@@ -168,21 +178,21 @@ class Timeline extends PureComponent {
   }
 
   itemHeights() {
-    return map(this.state.stages, 'height');
+    return map(this.state.items, 'height');
   }
 
   getVisibleItemIndexes() {
     const {
       height,
       scrollTop,
-      stages,
+      items,
     } = this.state;
 
     const isOffScreen = (itemScrollTop, screenHeight) =>
       ((itemScrollTop >= screenHeight) || (itemScrollTop <= -screenHeight));
 
     const onScreen = filter(
-      stages,
+      items,
       (item) => {
         if (isOffScreen(item.y - scrollTop, height)) {
           return false;

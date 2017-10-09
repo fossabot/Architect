@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { Group, Image } from 'react-konva';
 
-class ProtocolStage extends PureComponent {
+class TimelineStage extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -12,7 +13,8 @@ class ProtocolStage extends PureComponent {
 
   componentDidMount() {
     const image = new window.Image();
-    image.src = 'http://konvajs.github.io/assets/yoda.jpg';
+    const imageSrc = `/images/timeline/stage--${this.props.type}.png`;
+    image.src = imageSrc;
     image.onload = () => {
       this.setState({
         image,
@@ -22,11 +24,13 @@ class ProtocolStage extends PureComponent {
 
   render() {
     const image = this.state.image;
-    const surfaceWidth = window.innerWidth;
-    const surfaceHeight = window.innerHeight;
+    const {
+      width,
+      height,
+    } = this.props;
 
-    const height = surfaceHeight / 2;
-    const width = surfaceWidth;
+    const snapshotWidth = height * (4 / 3);
+    const snapshotX = (width - snapshotWidth) / 2;
 
     const groupProps = {
       y: 0,
@@ -37,9 +41,9 @@ class ProtocolStage extends PureComponent {
 
     const snapshotProps = {
       y: 0,
-      x: 0,
+      x: snapshotX,
       height,
-      width,
+      width: snapshotWidth,
     };
 
     return (
@@ -56,4 +60,15 @@ class ProtocolStage extends PureComponent {
   }
 }
 
-export default ProtocolStage;
+TimelineStage.propTypes = {
+  type: PropTypes.string.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
+};
+
+TimelineStage.defaultProps = {
+  width: 0,
+  height: 0,
+};
+
+export default TimelineStage;
