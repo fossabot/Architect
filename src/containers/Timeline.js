@@ -1,11 +1,18 @@
+/* eslint-disable */
 /* eslint-disable react/sort-comp, no-underscore-dangle */
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
-import { map, sum, filter } from 'lodash';
+import { flow as compose, map, sum, filter, pick, find, reduce } from 'lodash';
 import Scroller from 'scroller';
 import TimelineStage from './TimelineStage';
+
+const byId = (items) => reduce(
+  items,
+  (memo, item) => ({ [item.id]: item, ...memo }),
+  {},
+);
 
 class Timeline extends PureComponent {
   propTypes = {
@@ -20,7 +27,7 @@ class Timeline extends PureComponent {
   };
 
   defaultProps = {
-    item: [],
+    items: [],
     snapping: false,
     scrollingDeceleration: 0.95,
     scrollingPenetrationAcceleration: 0.08,
@@ -28,6 +35,24 @@ class Timeline extends PureComponent {
     onEditStage: () => {},
     onEditSkip: () => {},
   };
+
+  itemLayouts = (items) => {
+    const surfaceWidth = window.innerWidth;
+    const surfaceHeight = window.innerHeight;
+
+    const itemHeight = surfaceHeight * (2 / 3);
+
+    return map(
+      items,
+      (item, index) => ({
+        id: item.id,
+        height: itemHeight,
+        width: surfaceWidth,
+        y: itemHeight * index,
+        x: 0,
+      }),
+    )
+  }
 
   constructor(props) {
     const surfaceWidth = window.innerWidth;
@@ -39,53 +64,46 @@ class Timeline extends PureComponent {
       scrollTop: 0,
       width: surfaceWidth,
       height: surfaceHeight,
-      items: this.itemStates(this.props.items),
+      layout: {}
     };
   }
 
   componentDidMount() {
     this.createScroller();
-    this.updateScrollingDimensions();
+    this.updateLayoutState(this.props.items);
   }
 
   componentWillReceiveProps(newProps) {
+    this.updateLayoutState(newProps.items);
+  }
+
+  updateLayoutState(items) {
     this.setState({
-      items: this.itemStates(newProps.items),
+      layout: this.itemLayoutsFromProps(items),
     }, () => {
       this.updateScrollingDimensions();
     });
   }
 
-  itemStates = (items) => {
-    const surfaceWidth = window.innerWidth;
-    const surfaceHeight = window.innerHeight;
+  itemLayoutsFromProps = compose(
+    this.itemLayouts,
+    byId,
+  );
 
-    const itemHeight = surfaceHeight * (2 / 3);
+  itemCount = () => this.props.items.length;
 
-    return items.map(
-      (item, index) =>
-        ({
-          title: item.title,
-          type: item.type,
-          height: itemHeight,
-          width: surfaceWidth,
-          y: itemHeight * index,
-          x: 0,
-        }),
-    );
-  }
+  getItem = index => this.props.items[index];
 
-  itemCount = () => this.state.items.length;
-
-  getItem = index => this.state.items[index];
+  getLayout = id => this.state.layout[id];
 
   renderItem = (index) => {
     const item = this.getItem(index);
+    const layout = this.getLayout(item.id);
     const style = {
-      width: item.width,
-      height: item.height,
+      width: layout.width,
+      height: layout.height,
       x: 0,
-      y: item.y - this.state.scrollTop,
+      y: layout.y - this.state.scrollTop,
       zIndex: index,
     };
 
@@ -188,9 +206,13 @@ class Timeline extends PureComponent {
     this.scroller.setDimensions(width, height, scrollWidth, scrollHeight);
   }
 
-  itemHeights() {
-    return map(this.state.items, 'height');
-  }
+  itemIds = () => map(this.props.items, 'id');
+
+  itemHeights = () => reduce(
+    this.itemIds,
+    (memo, id) => ({ [id]: this.state.items[id], ...memo }),
+    {},
+  );
 
   getVisibleItemIndexes() {
     const {

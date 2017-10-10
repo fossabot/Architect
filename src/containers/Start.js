@@ -2,11 +2,8 @@ import React, { PureComponent } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-// import { times, random } from 'lodash';
 import Timeline from './Timeline';
 import { actionCreators as stageActions } from '../ducks/modules/stages';
-
-// const items = times(5, () => ({ title: `foo ${random(0, 100)}`, type: 'name-generator' }));
 
 class Start extends PureComponent {
   propTypes = {
