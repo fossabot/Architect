@@ -6,7 +6,7 @@ import Timeline from './Timeline';
 import { actionCreators as stageActions } from '../ducks/modules/stages';
 
 class Start extends PureComponent {
-  propTypes = {
+  static propTypes = {
     addStage: PropTypes.func.isRequired,
     stages: PropTypes.array.isRequired,
   };

@@ -4,7 +4,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
-import { flow as compose, map, sum, filter, pick, find, reduce } from 'lodash';
+import { isEmpty, flow as compose, map, sum, filter, pick, find, reduce } from 'lodash';
 import Scroller from 'scroller';
 import TimelineStage from './TimelineStage';
 
@@ -15,7 +15,7 @@ const byId = (items) => reduce(
 );
 
 class Timeline extends PureComponent {
-  propTypes = {
+  static propTypes = {
     items: PropTypes.array,
     snapping: PropTypes.bool,
     scrollingDeceleration: PropTypes.number,
@@ -26,7 +26,7 @@ class Timeline extends PureComponent {
     onEditSkip: PropTypes.func,
   };
 
-  defaultProps = {
+  static defaultProps = {
     items: [],
     snapping: false,
     scrollingDeceleration: 0.95,
@@ -218,15 +218,18 @@ class Timeline extends PureComponent {
     const {
       height,
       scrollTop,
-      items,
     } = this.state;
 
-    const isOnScreen = (itemHeight, itemScrollTop, screenHeight) =>
-      ((itemScrollTop <= screenHeight) && (itemScrollTop + itemHeight >= 0));
+    const items = this.props.items;
+
+    if (isEmpty(this.state.layout)) { return []; }
+
+    const isOnScreen = (scrollTop, screenHeight, item) =>
+      ((item.y - scrollTop <= screenHeight) && (item.y - scrollTop + item.height >= 0));
 
     const itemsOnScreen = map(
       items,
-      (item, index) => (isOnScreen(item.height, item.y - scrollTop, height) ? index : null),
+      (item, index) => (isOnScreen(scrollTop, height, this.getLayout(item.id)) ? index : null),
     );
 
     return filter(itemsOnScreen, index => index !== null);

@@ -128,7 +128,8 @@
     "dependencies": {
         "konva": "^1.6.8",
         "react-konva": "^1.1.4",
-        "scroller": "git://github.com/mjohnston/scroller"
+        "scroller": "git://github.com/mjohnston/scroller",
+        "shifty": "^2.1.2"
     },
     "homepage": ".",
     "main": "www/electron-starter.js",
