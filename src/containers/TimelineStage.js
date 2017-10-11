@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Group, Image, Rect, Text } from 'react-konva';
 
 class TimelineStage extends PureComponent {
-  propTypes = {
+  static propTypes = {
     type: PropTypes.string.isRequired,
     width: PropTypes.number,
     height: PropTypes.number,
@@ -13,7 +13,7 @@ class TimelineStage extends PureComponent {
     onEditSkip: PropTypes.func,
   };
 
-  defaultProps = {
+  static defaultProps = {
     width: 0,
     height: 0,
     title: '',

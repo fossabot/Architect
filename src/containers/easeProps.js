@@ -1,10 +1,13 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { transform } from 'lodash';
+import { reduce } from 'lodash';
 
-const linear = x => x;
+// const linear = x => x;
+// const sq = x => x;
+const easeInOutSine = x =>
+  -(Math.cos(Math.PI * x) - 1) / 2;
 
-function* easing(from, to, duration, easingMethod = linear) {
+function* easing(from, to, duration, easingMethod = easeInOutSine) {
   const start = performance.now();
   let dt = 0;
   while (true) {
@@ -16,23 +19,64 @@ function* easing(from, to, duration, easingMethod = linear) {
 
 const easeProps = WrappedComponent =>
   class extends PureComponent {
-    propTypes = {
+    static propTypes = {
       from: PropTypes.object,
       to: PropTypes.object,
+      base: PropTypes.object,
     };
 
-    componentWillReceiveProps(newProps) {
-      // initalise props
-      this.startAnimation(newProps);
+    static defaultProps = {
+      from: {},
+      to: {},
+      base: {},
+    };
+
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        props: {},
+      };
+
+      this.easedProps = {};
+      this.transitions = {};
     }
 
-    startAnimation() {
+    componentDidMount() {
+      this.end();
+      console.log('mounted');
+    }
+
+    componentWillReceiveProps(nextProps) {
+      this.startAnimation(nextProps);
+    }
+
+    end() {
+      this.transitions = {};
+
+      this.easedProps = { ...this.props.to };
+
+      this.setState({
+        props: this.props.to,
+      });
+    }
+
+    startAnimation(nextProps) {
+      if (this.animationFrame) { cancelAnimationFrame(this.animationFrame); }
+
       this.start = performance.now();
 
-      this.transitions = transform(
-        this.props.to,
+      const from = {
+        ...this.props.from,
+        ...this.easedProps,
+      };
+
+      console.log('startAnim', from, nextProps.to);
+
+      this.transitions = reduce(
+        nextProps.to,
         (memo, value, key) => ({
-          [key]: easing(this.props.from[key], value, 1000),
+          [key]: easing(from[key], value, 1000),
           ...memo,
         }),
         {},
@@ -42,26 +86,39 @@ const easeProps = WrappedComponent =>
     }
 
     update = () => {
-      if (performance.now() - this.start >= 1000) { return; }
+      if (performance.now() - this.start >= 1000) {
+        this.end();
+        return;
+      }
 
-      const props = transform(
+      const props = reduce(
         this.transitions,
         (memo, value, key) => ({
-          [key]: value.next(),
+          [key]: value.next().value,
           ...memo,
         }),
         {},
       );
 
+      this.easedProps = { ...props };
+
       this.setState({
         props,
       });
 
-      requestAnimationFrame(this.update);
+      this.animationFrame = requestAnimationFrame(this.update);
     }
 
     render() {
-      return <WrappedComponent {...this.props} {...this.state.props} />;
+      const props = reduce(
+        this.state.props,
+        (memo, value, key) => ({
+          [key]: value + (this.props.base[key] ? this.props.base[key] : 0),
+          ...memo,
+        }),
+        {},
+      );
+      return <WrappedComponent {...this.props} {...props} />;
     }
   };
 

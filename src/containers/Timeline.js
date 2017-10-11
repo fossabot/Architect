@@ -4,8 +4,9 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layer, Stage, Group, Rect } from 'react-konva';
-import { isEmpty, flow as compose, map, sum, filter, pick, find, reduce } from 'lodash';
+import { isEmpty, flow as compose, map, sum, filter, pick, find, reduce, values, keys } from 'lodash';
 import Scroller from 'scroller';
+import easeProps from './easeProps';
 import TimelineStage from './TimelineStage';
 
 const byId = (items) => reduce(
@@ -13,6 +14,8 @@ const byId = (items) => reduce(
   (memo, item) => ({ [item.id]: item, ...memo }),
   {},
 );
+
+const TweenedGroup = easeProps(Group);
 
 class Timeline extends PureComponent {
   static propTypes = {
@@ -99,23 +102,30 @@ class Timeline extends PureComponent {
   renderItem = (index) => {
     const item = this.getItem(index);
     const layout = this.getLayout(item.id);
-    const style = {
+
+    const to = {
+      y: layout.y,
+    };
+
+    const base = {
       width: layout.width,
       height: layout.height,
       x: 0,
-      y: layout.y - this.state.scrollTop,
+      y: -this.state.scrollTop,
       zIndex: index,
     };
 
     return (
-      <Group key={index} {...style}>
+      <TweenedGroup key={item.id} base={base} to={to}>
         <TimelineStage
           {...item}
+          width={layout.width}
+          height={layout.height}
           onAddStage={() => this.props.onAddStage(index)}
           onEditStage={() => this.props.onEditStage(index)}
           onEditSkip={() => this.props.onEditSkip(index)}
         />
-      </Group>
+      </TweenedGroup>
     );
   }
 
@@ -174,6 +184,7 @@ class Timeline extends PureComponent {
   handleScroll = (left, top) => {
     this.setState({ scrollTop: top });
     if (this.props.onScroll) {
+
       this.props.onScroll(top);
     }
   }
@@ -202,15 +213,16 @@ class Timeline extends PureComponent {
     const width = this.state.width;
     const height = this.state.height;
     const scrollWidth = width;
-    const scrollHeight = sum(this.itemHeights()) + height; // scroll past end
+    const scrollHeight = sum(values(this.itemHeights())) + height; // scroll past end
+
     this.scroller.setDimensions(width, height, scrollWidth, scrollHeight);
   }
 
   itemIds = () => map(this.props.items, 'id');
 
   itemHeights = () => reduce(
-    this.itemIds,
-    (memo, id) => ({ [id]: this.state.items[id], ...memo }),
+    this.itemIds(),
+    (memo, id) => ({ [id]: this.state.layout[id].height, ...memo }),
     {},
   );
 
@@ -220,9 +232,11 @@ class Timeline extends PureComponent {
       scrollTop,
     } = this.state;
 
+    if (isEmpty(this.state.layout)) { return []; }
+
     const items = this.props.items;
 
-    if (isEmpty(this.state.layout)) { return []; }
+    return map(items, (item, index) => index);
 
     const isOnScreen = (scrollTop, screenHeight, item) =>
       ((item.y - scrollTop <= screenHeight) && (item.y - scrollTop + item.height >= 0));
