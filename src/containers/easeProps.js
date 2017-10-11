@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { reduce } from 'lodash';
+import { reduce, isEqual } from 'lodash';
 
 // const linear = x => x;
 // const sq = x => x;
@@ -48,7 +48,9 @@ const easeProps = WrappedComponent =>
     }
 
     componentWillReceiveProps(nextProps) {
-      this.startAnimation(nextProps);
+      if (!isEqual(nextProps.to, this.props.to) || !isEqual(nextProps.from, this.props.from)) {
+        this.startAnimation(nextProps);
+      }
     }
 
     end() {
